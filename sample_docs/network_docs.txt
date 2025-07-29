@@ -1,0 +1,18 @@
+Cisco Router Troubleshooting:
+To configure DNS on a Cisco router, use the 'ip name-server' command. To check DNS resolution, use 'ping', 'nslookup', or 'show hosts'.
+If DNS is not working, check ACLs and NAT rules.
+
+Common DNS Issues:
+- Incorrect DNS IPs in /etc/resolv.conf
+- DNS ports (53) blocked by firewall
+- ISP DNS issues — try using 8.8.8.8 or 1.1.1.1
+
+Firewall Blocks:
+- Use 'nmap' or 'telnet' to check if ports are open.
+- Firewalls may block outbound ICMP or TCP ports.
+- Check iptables or ufw rules if using Linux.
+
+High Latency:
+- Causes: long routing paths, overloaded links, congestion.
+- Tools: traceroute, ping, MTR.
+- Solutions: optimize routes, upgrade bandwidth, QoS settings.

@@ -1,0 +1,5 @@
+Problem Summary: Intermittent connectivity to the internet.
+
+Likely Cause: This could be due to high network latency or congestion, as the ping command is getting responses for some requests but others are timing out.
+
+Suggested Fix: Use tools like traceroute or MTR to identify where the delays are occurring. If the issue is within your network, consider optimizing routes, upgrading bandwidth, or adjusting QoS settings. If the issue is outside your network, you may need to contact your ISP.

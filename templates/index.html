@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Network Troubleshooting Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">🔧 AI Network Troubleshooter</span>
+  </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card shadow-sm rounded-4 p-4">
+        <form method="POST">
+            <label class="form-label fw-bold">📥 Paste Network Logs:</label>
+            <textarea class="form-control mb-3" name="logs" rows="6" placeholder="Paste ping, traceroute, or syslog here...">{{ log_data }}</textarea>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">🔍 Sample Logs:</label>
+                    <select id="sampleSelect" class="form-select" onchange="loadSampleLog()">
+                        <option value="">-- Select a sample --</option>
+                        <option value="packet_loss">📉 Packet Loss</option>
+                        <option value="dns_fail">❌ DNS Resolution Failure</option>
+                        <option value="latency">🔥 High Latency</option>
+                        <option value="firewall">🔒 Firewall Block</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2">Analyze</button>
+                    <a href="/clear" class="btn btn-outline-danger">🗑 Clear</a>
+                </div>
+            </div>
+        </form>
+
+        {% if log_category %}
+        <div class="alert alert-info">
+            🏷 <strong>Error Category:</strong> {{ log_category }}
+        </div>
+        {% endif %}
+
+        {% if analysis_result %}
+        <div class="alert alert-secondary">
+            <strong>Initial Diagnosis:</strong><br>
+            {{ analysis_result|safe }}
+        </div>
+
+        <form method="POST" action="/download">
+            <input type="hidden" name="analysis_text" value="{{ analysis_result }}">
+            <button type="submit" class="btn btn-success btn-sm">Download Diagnosis</button>
+        </form>
+        {% endif %}
+
+        {% if reference_docs %}
+        <div class="bg-light border p-3 rounded mt-3">
+            <h6 class="fw-bold">📚 Referenced Documentation:</h6>
+            <pre class="doc-block">{{ reference_docs }}</pre>
+        </div>
+        {% endif %}
+
+        {% if chat_history %}
+        <div class="chat-window mt-4 mb-2">
+            {% for entry in chat_history %}
+                {% if entry.role == 'user' %}
+                <div class="chat-bubble user">
+                    <span>👤 You</span>
+                    <p>{{ entry.content }}</p>
+                </div>
+                {% else %}
+                <div class="chat-bubble assistant">
+                    <span>🤖 Assistant</span>
+                    <p>{{ entry.content|safe }}</p>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <form method="POST" action="/followup" class="mt-3">
+            <textarea class="form-control mb-2" name="followup_question" rows="2" placeholder="Ask a follow-up question..."></textarea>
+            <button type="submit" class="btn btn-outline-primary">Ask</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function loadSampleLog() {
+    let selected = document.getElementById("sampleSelect").value;
+    let logs = "";
+
+    if (selected === "packet_loss") {
+        logs = `PING 8.8.8.8: 56 data bytes
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=56 time=11.2 ms
+Request timeout for icmp_seq 2
+Request timeout for icmp_seq 3
+64 bytes from 8.8.8.8: icmp_seq=4 ttl=56 time=10.9 ms`;
+    } else if (selected === "dns_fail") {
+        logs = `ping: cannot resolve example.invalid: Unknown host
+dig example.invalid
+;; connection timed out; no servers could be reached`;
+    } else if (selected === "latency") {
+        logs = `64 bytes from 1.1.1.1: icmp_seq=1 ttl=55 time=120.1 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=55 time=230.3 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=55 time=310.7 ms`;
+    } else if (selected === "firewall") {
+        logs = `telnet 192.168.1.1 80
+Trying 192.168.1.1...
+telnet: Unable to connect to remote host: Connection timed out
+
+nmap -p 80 192.168.1.1
+PORT   STATE    SERVICE
+80/tcp filtered http`;
+    }
+
+    document.querySelector("textarea[name='logs']").value = logs;
+}
+</script>
+
+</body>
+</html>
